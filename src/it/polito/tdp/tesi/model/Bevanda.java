@@ -7,6 +7,8 @@ public class Bevanda {
 	private double prezzo;
 	private String descrizione;
 	
+	private int quantita;
+	
 	private double costo; //per produzione
 	
 	public int getId() {
@@ -39,6 +41,7 @@ public class Bevanda {
 		this.prezzo = prezzo;
 		this.descrizione = descrizione;
 		this.costo = costo;
+		this.quantita = 0;
 	}
 	
 	public Bevanda() {
@@ -63,6 +66,14 @@ public class Bevanda {
 			return false;
 		return true;
 	}
+	
+	public int getQuantita() {
+		return quantita;
+	}
+	public void incrementaQuantita() {
+		this.quantita ++;
+	}
+	
 	
 	
 }

@@ -9,7 +9,6 @@ public class Cliente {
 	private List<Piatto> listaPiatti;
 	private List<Bevanda> listaBevande;
 	private int tempoRiordino;
-	private Random r;
 	private boolean primoOrdine; //per fare in modo che ordini cibo e bevanda
 	
 	//private double soddisfazione; vedere se usare per soddisfazione in %
@@ -76,7 +75,6 @@ public class Cliente {
 		this.id = id;
 		this.budget = budget;
 		this.tempoRiordino = tempo;
-		this.r = new Random();
 		this.listaBevande = new LinkedList<Bevanda>();
 		this.listaPiatti = new LinkedList<Piatto>();
 		this.primoOrdine = true;
@@ -103,4 +101,11 @@ public class Cliente {
 		}
 		return somma;
 	}
+	@Override
+	public String toString() {
+		return "Cliente [id=" + id + ", budget=" + budget + ", tempoRiordino=" + tempoRiordino + "]";
+	}
+	
+	
+	
 }

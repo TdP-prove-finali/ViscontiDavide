@@ -4,12 +4,14 @@ public class Dipendente {
 	
 	private int id;
 	private boolean occupato;
+	private double pagaOraria;
 	
 	
 	
-	public Dipendente(int id, boolean occupato) {
+	public Dipendente(int id, boolean occupato, double paga) {
 		this.id = id;
 		this.occupato = occupato;
+		this.pagaOraria = paga;
 	}
 	
 	
@@ -44,6 +46,16 @@ public class Dipendente {
 		if (id != other.id)
 			return false;
 		return true;
+	}
+
+
+	public double getPagaOraria() {
+		return pagaOraria;
+	}
+
+
+	public void setPagaOraria(double pagaOraria) {
+		this.pagaOraria = pagaOraria;
 	}
 	
 	

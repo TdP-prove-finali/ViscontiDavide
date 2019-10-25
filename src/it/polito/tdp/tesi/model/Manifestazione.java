@@ -1,19 +1,15 @@
 package it.polito.tdp.tesi.model;
 
-import java.util.*;
-
 public class Manifestazione {
 
 	private int id;
 	private int costo;
-	private Random r;
 	private String descrizione;
 	private double budgetMedio;
 	private int numeroPersone;
 	
 	
 	public Manifestazione() {
-		r = new Random();
 	}
 
 
@@ -23,7 +19,6 @@ public class Manifestazione {
 		this.descrizione = descrizione;
 		this.budgetMedio = budgetMedio;
 		this.numeroPersone = numeroPersone;
-		r = new Random();
 	}
 
 	
@@ -36,17 +31,6 @@ public class Manifestazione {
 	public void setId(int id) {
 		this.id = id;
 	}
-
-
-	public Random getR() {
-		return r;
-	}
-
-
-	public void setR(Random r) {
-		this.r = r;
-	}
-
 
 	public int getCosto() {
 		return costo;

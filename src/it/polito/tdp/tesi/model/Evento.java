@@ -1,10 +1,8 @@
 package it.polito.tdp.tesi.model;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.*;
 
-public class Evento {
+public class Evento implements Comparable<Evento>{
 
 	public enum TipoEvento {
 		ARRIVO_CODA,
@@ -41,6 +39,16 @@ public class Evento {
 	}
 	public void setCliente(Cliente cliente) {
 		this.cliente = cliente;
+	}
+
+	@Override
+	public int compareTo(Evento arg0) {
+		return this.ora.compareTo(arg0.ora);
+	}
+
+	@Override
+	public String toString() {
+		return "Evento [ora=" + ora + ", tipo=" + tipo + ", cliente=" + cliente + "]";
 	}
 	
 	
