@@ -11,8 +11,51 @@ public class Cliente {
 	private int tempoRiordino;
 	private boolean primoOrdine; //per fare in modo che ordini cibo e bevanda
 	
-	//private double soddisfazione; vedere se usare per soddisfazione in %
+	private double tempoAttesaCassa;
+	private double tempoAttesaServizio;
+	private int numOrdini;
 	
+	private boolean insoddisfatto;
+		
+	
+	public int getNumOrdini() {
+		return numOrdini;
+	}
+
+	public void addNumOrdini() {
+		this.numOrdini++;
+	}
+
+	public void setNumOrdini(int numOrdini) {
+		this.numOrdini = numOrdini;
+	}
+
+
+
+	public Cliente(int id, double budget, int tempo) {
+		this.tempoAttesaCassa = 0;
+		this.tempoAttesaServizio = 0;
+		this.numOrdini = 0;
+		this.id = id;
+		this.budget = budget;
+		this.tempoRiordino = tempo;
+		this.listaBevande = new LinkedList<Bevanda>();
+		this.listaPiatti = new LinkedList<Piatto>();
+		this.primoOrdine = true;
+		this.insoddisfatto = false;
+	}
+	
+	
+	
+	
+	public boolean isInsoddisfatto() {
+		return insoddisfatto;
+	}
+
+	public void setInsoddisfatto() {
+		this.insoddisfatto = false;
+	}
+
 	public int getId() {
 		return id;
 	}
@@ -71,14 +114,7 @@ public class Cliente {
 	public void setListaBevande(List<Bevanda> listaBevande) {
 		this.listaBevande = listaBevande;
 	}
-	public Cliente(int id, double budget, int tempo) {
-		this.id = id;
-		this.budget = budget;
-		this.tempoRiordino = tempo;
-		this.listaBevande = new LinkedList<Bevanda>();
-		this.listaPiatti = new LinkedList<Piatto>();
-		this.primoOrdine = true;
-	}
+	
 	public void decrementaBudget(double spesa){
 		this.budget -= spesa;
 	}
@@ -91,6 +127,22 @@ public class Cliente {
 	}
 	public void setTempoRiordino(int tempoRiordino) {
 		this.tempoRiordino = tempoRiordino;
+	}
+
+	public double getTempoAttesaCassa() {
+		return tempoAttesaCassa;
+	}
+
+	public void setTempoAttesaCassa(double tempoAttesaCassa) {
+		this.tempoAttesaCassa += tempoAttesaCassa;
+	}
+
+	public double getTempoAttesaServizio() {
+		return tempoAttesaServizio;
+	}
+
+	public void setTempoAttesaServizio(double tempoAttesaServizio) {
+		this.tempoAttesaServizio += tempoAttesaServizio;
 	}
 
 	public int sommaTempoPiatti() {

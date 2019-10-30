@@ -2,6 +2,8 @@ package it.polito.tdp.tesi.model;
 
 import java.time.LocalDateTime;
 import java.util.*;
+
+import it.polito.tdp.tesi.db.ProvaFinaleDAO;
 import it.polito.tdp.tesi.model.Evento.TipoEvento;
 
 public class Model {
@@ -9,6 +11,7 @@ public class Model {
 	private double incasso;
 	private double costoTotale;
 	private double guadagno;
+	private int numOrdiniTotale;
 	private List<Cliente> listaClientiCoda;
 	private List<Cliente> listaClientiDaServire;
 	private List<Cliente> listaClienti;     //tutti i clienti
@@ -20,9 +23,11 @@ public class Model {
 	private Random r;
 	private LocalDateTime oraInizio;
 	private LocalDateTime oraFine;
-	private int clientiInsoddisfatti;
+	
+	private Map<Integer,Cliente> idMapClienti;
 	
 	private double tempoMaxAttesaServizio;
+	private double maxAttesaServizio;   //per insoddisfazione
 	private int tempoMaxAttesaCassa;
 	
 	private PriorityQueue<Evento> queue;
@@ -30,16 +35,17 @@ public class Model {
 	private List<Piatto> piattiOrdinati;
 	private List<Bevanda> bevandeOrdinate;
 	
-//	private dao;
+	private ProvaFinaleDAO dao;
 	
 	
 	public Model(Manifestazione m, List<Piatto> l, List<Bevanda> b) {   //passo la lista dall'interfaccia
 		this.incasso = 0;
 		this.costoTotale = 0;
+		this.numOrdiniTotale = 0;
 		this.guadagno = 0;
 		this.tempoMaxAttesaCassa = 0;
-		this.tempoMaxAttesaServizio = 30;
-		this.clientiInsoddisfatti = 0;
+		this.maxAttesaServizio = 30;
+		this.tempoMaxAttesaServizio = 0;
 		this.m = m;
 		this.oraInizio = LocalDateTime.of(2019, 1, 1, 19, 0, 0);
 		this.oraFine = LocalDateTime.of(2019, 1, 2, 1, 0, 0);
@@ -56,16 +62,18 @@ public class Model {
 		this.bevandeOrdinate = new LinkedList<Bevanda>();
 		this.piattiOrdinati = new LinkedList<Piatto>();
 		this.r = new Random();
+		this.idMapClienti = new HashMap<Integer, Cliente>();
+		this.dao = new ProvaFinaleDAO();
 	}
 	
 	
 	public void creaDipendenti(int cassa, int bancone, double paga) { //passo i parametri dall'interfaccia (scelta utente)
 		for(int i = 0; i < cassa; i++) {
-			Dipendente d = new Dipendente(i, false, paga);				//un dipendente fisso bevande, messo tra bancone
+			Dipendente d = new Dipendente(i, paga);				//un dipendente fisso bevande, messo tra bancone
 			listaDipendentiCassa.add(d);
 		}
 		for(int i = cassa; i < (bancone+cassa); i++) {
-			Dipendente d = new Dipendente(i, false, paga);
+			Dipendente d = new Dipendente(i, paga);
 			listaDipendentiBancone.add(d);
 		}
 	}
@@ -93,7 +101,8 @@ public class Model {
 			Cliente c = new Cliente(i,m.getBudgetMedio(),(int)tmp);
 			
 //			System.out.println(c.toString());
-			listaClienti.add(c);		
+			listaClienti.add(c);	
+			idMapClienti.put(i, c);
 		}
 	}
 	
@@ -135,6 +144,9 @@ public class Model {
 				budget += budget*(r.nextInt(30)+1)/100;
 			if(probabilita == 1)
 				budget -= budget*(r.nextInt(30)+1)/100;
+			
+			listaClienti.get(i).setBudget(budget);
+			
 			int intervalloTempo = 60*60/secondaFascia; //in secondi
 			
 //			System.out.println("intervallo2: "+intervalloTempo);
@@ -153,6 +165,9 @@ public class Model {
 				budget += budget*(r.nextInt(30)+1)/100;
 			if(probabilita == 1)
 				budget -= budget*(r.nextInt(30)+1)/100;
+			
+			listaClienti.get(i).setBudget(budget);
+
 			int intervalloTempo = 60*60/terzaFascia;
 			
 //			System.out.println("intervallo3: "+intervalloTempo);
@@ -182,15 +197,21 @@ public class Model {
 					int personeInCoda = listaClientiCoda.size(); //stimo 30 secondi ciascuno +10 max
 					double secondiAttesa = personeInCoda*(30+r.nextInt(11)) / listaDipendentiCassa.size();
 					
+					//ev.getCliente().incrementaAttesa((int)secondiAttesa);
+					ev.getCliente().setTempoAttesaCassa(secondiAttesa);
+					
 					if(secondiAttesa > tempoMaxAttesaCassa)
 						tempoMaxAttesaCassa = (int)secondiAttesa;
 					
 					listaClientiCoda.add(ev.getCliente());
 					
-					System.out.println(secondiAttesa);
+//					System.out.println(secondiAttesa);
 							
 					Evento e1 = new Evento(ev.getOra().plusSeconds((int)secondiAttesa), TipoEvento.ORDINE, ev.getCliente());
 					
+					
+					idMapClienti.remove(ev.getCliente().getId());
+					idMapClienti.put(ev.getCliente().getId(), ev.getCliente());
 	//				System.out.println(e1.toString());
 					
 					if(e1.getOra().isBefore(oraFine))
@@ -226,22 +247,34 @@ public class Model {
 							
 							double attesa = 0;
 						
-							for(int i = 1; i < listaClientiDaServire.size(); i ++) {
+							for(int i = 0; i < listaClientiDaServire.size(); i ++) {
 								attesa += listaClientiDaServire.get(i).sommaTempoPiatti();
 							}
-							attesa = attesa/(listaDipendentiBancone.size()-1);
+							attesa = attesa/(listaDipendentiBancone.size()-1);   //uno per le bevande
 							
-							if(attesa > tempoMaxAttesaServizio) 
-								clientiInsoddisfatti++;
+							if(attesa > maxAttesaServizio) {
+								if(!ev.getCliente().isInsoddisfatto())
+									ev.getCliente().setInsoddisfatto();
+								if(attesa > tempoMaxAttesaServizio)
+									tempoMaxAttesaServizio = attesa;
+							}
+							
+							ev.getCliente().setTempoAttesaServizio(attesa);
+							ev.getCliente().addNumOrdini();
 							
 							
+							listaClientiDaServire.add(ev.getCliente());
+													
 							Evento e2 = new Evento(ev.getOra().plusMinutes((int)attesa), TipoEvento.SERVIZIO, ev.getCliente());
 							
+							idMapClienti.remove(ev.getCliente().getId());
+							idMapClienti.put(ev.getCliente().getId(), ev.getCliente());
 //							System.out.println(e2.toString());
 							
 							if(e2.getOra().isBefore(oraFine))
 								queue.add(e2);
 							}
+						
 						break;
 					}
 					else {
@@ -261,18 +294,29 @@ public class Model {
 								
 								double attesa = 0;
 							
-								for(int i = 1; i < listaClientiDaServire.size(); i ++) {
+								for(int i = 0; i < listaClientiDaServire.size(); i ++) {
 									attesa += listaClientiDaServire.get(i).sommaTempoPiatti();
 								}
 								attesa = attesa/(listaDipendentiBancone.size()-1);
 								
-								System.out.println(attesa);
+							
+								ev.getCliente().setTempoAttesaServizio(attesa);
+								ev.getCliente().addNumOrdini();
+
+//								System.out.println(attesa);
 								
-								if(attesa > tempoMaxAttesaServizio) 
-									clientiInsoddisfatti++;
+								if(attesa > maxAttesaServizio) {
+									if(!ev.getCliente().isInsoddisfatto())
+										ev.getCliente().setInsoddisfatto();
+									if(attesa > tempoMaxAttesaServizio)
+										tempoMaxAttesaServizio = attesa;
+								}
 								
 								
 								Evento e2 = new Evento(ev.getOra().plusMinutes((int)attesa), TipoEvento.SERVIZIO, ev.getCliente());
+								
+								idMapClienti.remove(ev.getCliente().getId());
+								idMapClienti.put(ev.getCliente().getId(), ev.getCliente());
 								
 //								System.out.println(e2.toString());
 								if(e2.getOra().isBefore(oraFine))
@@ -281,6 +325,7 @@ public class Model {
 						}
 						if(prob == 1) { // solo bevanda, no tempo di attesa
 							Bevanda b = new Bevanda();
+							
 							b = listaBevande.get(r.nextInt(bevande));
 							
 							if(ev.getCliente().getBudget() > b.getPrezzo()) {
@@ -290,14 +335,21 @@ public class Model {
 								bevandeOrdinate.add(b);
 								
 								incasso += b.getPrezzo();
+								
+								ev.getCliente().addNumOrdini();
+								
+								idMapClienti.remove(ev.getCliente().getId());
+								idMapClienti.put(ev.getCliente().getId(), ev.getCliente());
 							}
 						}
 						if(prob == 2) { // entrambi
 							Piatto p = new Piatto();
 							p = listaPiatti.get(r.nextInt(piatti));
 							Bevanda b = new Bevanda();
+							
 							b = listaBevande.get(r.nextInt(bevande));
 							
+														
 							double spesa = p.getPrezzo()+b.getPrezzo();
 							
 							if(ev.getCliente().getBudget() > (spesa)) {
@@ -312,16 +364,26 @@ public class Model {
 								
 								double attesa = 0;
 							
-								for(int i = 1; i < listaClientiDaServire.size(); i ++) {
+								for(int i = 0; i < listaClientiDaServire.size(); i ++) {
 									attesa += listaClientiDaServire.get(i).sommaTempoPiatti();
 								}
 								attesa = attesa/(listaDipendentiBancone.size()-1);
 								
-								if(attesa > tempoMaxAttesaServizio) 
-									clientiInsoddisfatti++;
+								ev.getCliente().setTempoAttesaServizio(attesa);
+								ev.getCliente().addNumOrdini();
+
+								if(attesa > maxAttesaServizio) {
+									if(!ev.getCliente().isInsoddisfatto())
+										ev.getCliente().setInsoddisfatto();
+									if(attesa > tempoMaxAttesaServizio)
+										tempoMaxAttesaServizio = attesa;
+								}
 								
 								
 								Evento e2 = new Evento(ev.getOra().plusMinutes((int)attesa), TipoEvento.SERVIZIO, ev.getCliente());
+								
+								idMapClienti.remove(ev.getCliente().getId());
+								idMapClienti.put(ev.getCliente().getId(), ev.getCliente());
 								
 //								System.out.println(e2.toString());
 								if(e2.getOra().isBefore(oraFine))
@@ -334,6 +396,7 @@ public class Model {
 				case SERVIZIO:
 					
 					ev.getCliente().getListaPiatti().get(0).setServito();  //piatto servito
+					listaClientiDaServire.remove(ev.getCliente());
 					
 					Evento e3 = new Evento(ev.getOra().plusMinutes(ev.getCliente().getTempoRiordino()), TipoEvento.ARRIVO_CODA, ev.getCliente());
 					
@@ -352,26 +415,35 @@ public class Model {
 		System.out.println(guadagno);
 		
 		piattiOrdinati = quantitaOrdinatePiatti(piattiOrdinati);
-		for(Piatto p : piattiOrdinati) {     //calcolo numeroro qta fisse da produrre
+		for(Piatto p : piattiOrdinati) {     //calcolo numero qta fisse da produrre
 			p.calcolaQtaDaProdurre();
 		}
 		for(Piatto p : piattiOrdinati) {
 			System.out.println(p.toString());
 		}
 		bevandeOrdinate = quantitaOrdinateBevande(bevandeOrdinate);
+		
+		for(Cliente c : idMapClienti.values()) {
+			this.numOrdiniTotale += c.getNumOrdini();
+		}
 	}
 
-
-	public double getTempoMaxAttesaServizio() {
-		return tempoMaxAttesaServizio;
+	public double calcolaAttesaServizio(Map<Integer,Cliente> map) {
+		double d = 0;
+		for(Cliente c : map.values()) {
+			d += c.getTempoAttesaServizio();
+		}
+		return d;
 	}
-
-
-	public void setTempoMaxAttesaServizio(double tempoMedioAttesaServizio) {
-		this.tempoMaxAttesaServizio = tempoMedioAttesaServizio;
+	
+	public double calcolaAttesaCassa(Map<Integer,Cliente> map) {
+		double d = 0;
+		for(Cliente c : map.values()) {
+			d += c.getTempoAttesaCassa();
+		}
+		return d;
 	}
-
-
+	
 	public double getIncasso() {
 		return incasso;
 	}
@@ -381,17 +453,6 @@ public class Model {
 		this.incasso = incasso;
 	}
 
-
-	public int getClientiInsoddisfatti() {
-		return clientiInsoddisfatti;
-	}
-
-
-	public void setClientiInsoddisfatti(int clientiInsoddisfatti) {
-		this.clientiInsoddisfatti = clientiInsoddisfatti;
-	}
-	
-	
 	
 	public double getCostoTotale() {
 		return costoTotale;
@@ -440,6 +501,17 @@ public class Model {
 
 	public void setBevandeOrdinate(List<Bevanda> bevandeOrdinate) {
 		this.bevandeOrdinate = bevandeOrdinate;
+	}
+
+	
+
+	public int getNumOrdiniTotale() {
+		return numOrdiniTotale;
+	}
+
+
+	public void setNumOrdiniTotale(int numOrdiniTotale) {
+		this.numOrdiniTotale = numOrdiniTotale;
 	}
 
 
@@ -494,6 +566,112 @@ public class Model {
 		List<Piatto> l = new LinkedList<Piatto>(m.values());
 		return l;
 	}
+
+
+	public List<Cliente> getListaClientiCoda() {
+		return listaClientiCoda;
+	}
+
+
+	public void setListaClientiCoda(List<Cliente> listaClientiCoda) {
+		this.listaClientiCoda = listaClientiCoda;
+	}
+
+
+	public List<Cliente> getListaClientiDaServire() {
+		return listaClientiDaServire;
+	}
+
+
+	public void setListaClientiDaServire(List<Cliente> listaClientiDaServire) {
+		this.listaClientiDaServire = listaClientiDaServire;
+	}
+
+
+	public List<Cliente> getListaClienti() {
+		return listaClienti;
+	}
+
+
+	public void setListaClienti(List<Cliente> listaClienti) {
+		this.listaClienti = listaClienti;
+	}
+
+
+	public List<Dipendente> getListaDipendentiCassa() {
+		return listaDipendentiCassa;
+	}
+
+
+	public void setListaDipendentiCassa(List<Dipendente> listaDipendentiCassa) {
+		this.listaDipendentiCassa = listaDipendentiCassa;
+	}
+
+
+	public List<Dipendente> getListaDipendentiBancone() {
+		return listaDipendentiBancone;
+	}
+
+
+	public void setListaDipendentiBancone(List<Dipendente> listaDipendentiBancone) {
+		this.listaDipendentiBancone = listaDipendentiBancone;
+	}
+
+
+	public List<Piatto> getListaPiatti() {
+		return listaPiatti;
+	}
+
+
+	public void setListaPiatti(List<Piatto> listaPiatti) {
+		this.listaPiatti = listaPiatti;
+	}
+
+
+	public List<Bevanda> getListaBevande() {
+		return listaBevande;
+	}
+
+
+	public void setListaBevande(List<Bevanda> listaBevande) {
+		this.listaBevande = listaBevande;
+	}
+
+
+	public Map<Integer, Cliente> getIdMapClienti() {
+		return idMapClienti;
+	}
+
+
+	public void setIdMapClienti(Map<Integer, Cliente> idMapClienti) {
+		this.idMapClienti = idMapClienti;
+	}
+
+
+	public ProvaFinaleDAO getDao() {
+		return dao;
+	}
+
+
+	public double getTempoMaxAttesaServizio() {
+		return tempoMaxAttesaServizio;
+	}
+
+
+	public void setTempoMaxAttesaServizio(double tempoMaxAttesaServizio) {
+		this.tempoMaxAttesaServizio = tempoMaxAttesaServizio;
+	}
+
+
+	public double getMaxAttesaServizio() {
+		return maxAttesaServizio;
+	}
+
+
+	public void setMaxAttesaServizio(double maxAttesaServizio) {
+		this.maxAttesaServizio = maxAttesaServizio;
+	}
+
 	
 	
 }

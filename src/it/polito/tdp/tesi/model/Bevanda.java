@@ -8,8 +8,23 @@ public class Bevanda {
 	private String descrizione;
 	
 	private int quantita;
+	private double costo;
 	
-	private double costo; //per produzione
+	private double qtaOrdinMedia;
+	
+	
+	
+	public Bevanda(int id, double prezzo, String descrizione, double costo) {
+		this.id = id;
+		this.prezzo = prezzo;
+		this.descrizione = descrizione;
+		this.costo = costo;
+		this.quantita = 0;
+		this.qtaOrdinMedia = 0;
+	}
+	
+	public Bevanda() {
+	}
 	
 	public int getId() {
 		return id;
@@ -36,16 +51,15 @@ public class Bevanda {
 	public void setCosto(double costo) {
 		this.costo = costo;
 	}
-	public Bevanda(int id, double prezzo, String descrizione, double costo) {
-		this.id = id;
-		this.prezzo = prezzo;
-		this.descrizione = descrizione;
-		this.costo = costo;
-		this.quantita = 0;
-	}
 	
-	public Bevanda() {
+	public double getQtaOrdinMedia() {
+		return qtaOrdinMedia;
 	}
+
+	public void setQtaOrdinMedia(double qtaOrdinMedia) {
+		this.qtaOrdinMedia = qtaOrdinMedia;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -72,6 +86,13 @@ public class Bevanda {
 	}
 	public void incrementaQuantita() {
 		this.quantita ++;
+	}
+	@Override
+	public String toString() {
+		return "Bevanda [prezzo=" + prezzo + ", descrizione=" + descrizione + "]";
+	}
+	public void setQuantita(int quantita) {
+		this.quantita += quantita;
 	}
 	
 	

@@ -95,4 +95,11 @@ public class Manifestazione {
 		return true;
 	}
 
+
+	@Override
+	public String toString() {
+		return "Manifestazione [costo=" + costo + ", descrizione=" + descrizione + ", budgetMedio=" + budgetMedio
+				+ ", numeroPersone=" + numeroPersone + "]";
+	}
+
 }

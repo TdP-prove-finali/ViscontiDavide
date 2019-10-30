@@ -14,6 +14,9 @@ public class Piatto {
 	
 	private int quantita;
 	
+	private double qtaOrdinMedia;
+	private double qtaProdMedia;
+	
 	
 	public Piatto(int id, double costo, int tempoPrep, String descrizione, double prezzo, int qta) {
 		this.id = id;
@@ -25,6 +28,8 @@ public class Piatto {
 		this.quantita = 0;
 		this.qtaPreparazione = qta;
 		this.qtaDaProdurre = 0;
+		this.qtaOrdinMedia = 0;
+		this.qtaProdMedia = 0;
 	}
 	
 	
@@ -39,6 +44,7 @@ public class Piatto {
 		this.servito = false;
 		this.quantita = 0;
 		this.qtaPreparazione = 0;
+		this.qtaDaProdurre = 0;
 	}
 
 
@@ -49,18 +55,14 @@ public class Piatto {
 	}
 
 
-
-
 	public void setQtaPreparazione(int qtaPreparazione) {
 		this.qtaPreparazione = qtaPreparazione;
 	}
 
 
 	public void setQuantita(int quantita) {
-		this.quantita = quantita;
+		this.quantita += quantita;
 	}
-
-
 
 
 	public int getQtaDaProdurre() {
@@ -68,15 +70,11 @@ public class Piatto {
 	}
 
 
-
-
 	public void setQtaDaProdurre(int qtaDaProdurre) {
-		this.qtaDaProdurre = qtaDaProdurre;
+		this.qtaDaProdurre += qtaDaProdurre;
 	}
 
-
-
-
+	
 	public Piatto() {
 	}
 
@@ -128,6 +126,34 @@ public class Piatto {
 	public void setDescrizione(String descrizione) {
 		this.descrizione = descrizione;
 	}
+
+	
+	public double getQtaOrdinMedia() {
+		return qtaOrdinMedia;
+	}
+
+
+
+
+	public void setQtaOrdinMedia(double qtaOrdinMedia) {
+		this.qtaOrdinMedia = qtaOrdinMedia;
+	}
+
+
+
+
+	public double getQtaProdMedia() {
+		return qtaProdMedia;
+	}
+
+
+
+
+	public void setQtaProdMedia(double qtaProdMedia) {
+		this.qtaProdMedia = qtaProdMedia;
+	}
+
+
 
 
 	@Override

@@ -3,14 +3,12 @@ package it.polito.tdp.tesi.model;
 public class Dipendente {
 	
 	private int id;
-	private boolean occupato;
 	private double pagaOraria;
 	
 	
 	
-	public Dipendente(int id, boolean occupato, double paga) {
+	public Dipendente(int id, double paga) {
 		this.id = id;
-		this.occupato = occupato;
 		this.pagaOraria = paga;
 	}
 	
@@ -20,12 +18,6 @@ public class Dipendente {
 	}
 	public void setId(int id) {
 		this.id = id;
-	}
-	public boolean isOccupato() {
-		return occupato;
-	}
-	public void setOccupato(boolean occupato) {
-		this.occupato = occupato;
 	}
 	@Override
 	public int hashCode() {
