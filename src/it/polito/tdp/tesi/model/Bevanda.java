@@ -87,12 +87,18 @@ public class Bevanda {
 	public void incrementaQuantita() {
 		this.quantita ++;
 	}
-	@Override
-	public String toString() {
-		return "Bevanda [prezzo=" + prezzo + ", descrizione=" + descrizione + "]";
-	}
+	
 	public void setQuantita(int quantita) {
 		this.quantita += quantita;
+	}
+
+	@Override
+	public String toString() {
+		return this.descrizione+": prezzo "+this.prezzo+";\n quantità "+this.quantita+"; quantità media: "+this.qtaOrdinMedia+"\n";
+	}
+
+	public void setQuantita2(int quantita) {
+		this.quantita = quantita;
 	}
 	
 	

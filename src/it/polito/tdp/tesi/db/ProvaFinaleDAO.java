@@ -15,7 +15,7 @@ public class ProvaFinaleDAO {
 	
 	public List<Piatto> listaPiattiDAO() {
 		
-		String sql = "SELECT * FROM piatti";
+		String sql = "SELECT * FROM piatti ORDER BY descrizione ASC";
 		
 		try {
 			Connection conn = ConnectDB.getConnection() ;
@@ -29,7 +29,7 @@ public class ProvaFinaleDAO {
 			while(res.next()) {
 				try {
 					list.add(new Piatto(res.getInt("id"),res.getDouble("costo"),res.getInt("tempo_prep"),
-							res.getString("descrizione"),res.getDouble("prezzo"),res.getInt("quantita")));
+							res.getString("descrizione"),res.getDouble("prezzo"),res.getInt("quantita"),res.getString("genere")));
 					
 				} catch (Throwable t) {
 					t.printStackTrace();
@@ -50,7 +50,7 @@ public class ProvaFinaleDAO {
 	
 	public List<Bevanda> listaBevandeDAO() {
 			
-			String sql = "SELECT * FROM bevande";
+			String sql = "SELECT * FROM bevande ORDER BY descrizione ASC";
 			
 			try {
 				Connection conn = ConnectDB.getConnection() ;
@@ -84,7 +84,7 @@ public class ProvaFinaleDAO {
 		
 	public List<Manifestazione> listaManifestazioniDAO() {
 		
-		String sql = "SELECT * FROM evento";
+		String sql = "SELECT * FROM evento ORDER BY descrizione ASC";
 		
 		try {
 			Connection conn = ConnectDB.getConnection() ;
@@ -115,5 +115,37 @@ public class ProvaFinaleDAO {
 		}
 	}
 	
+public List<Piatto> listaPiattiPrincipaliDAO() {
+		
+		String sql = "SELECT * FROM piatti WHERE genere= 'principale' ORDER BY descrizione ASC";
+		
+		try {
+			Connection conn = ConnectDB.getConnection() ;
+
+			PreparedStatement st = conn.prepareStatement(sql) ;
+			
+			List<Piatto> list = new ArrayList<>() ;
+			
+			ResultSet res = st.executeQuery() ;
+			
+			while(res.next()) {
+				try {
+					list.add(new Piatto(res.getInt("id"),res.getDouble("costo"),res.getInt("tempo_prep"),
+							res.getString("descrizione"),res.getDouble("prezzo"),res.getInt("quantita"),res.getString("genere")));
+					
+				} catch (Throwable t) {
+					t.printStackTrace();
+					System.out.println(res.getInt("id"));
+				}
+			}
+			
+			conn.close();
+			return list ;
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null ;
+		}
+	}
 	
 }

@@ -7,8 +7,8 @@ public class Piatto {
 	private int tempoPrep;
 	private String descrizione;
 	private double prezzo;
-	private boolean servito;
 	
+	private String genere;
 	private int qtaPreparazione;   //qta fissa da preparare
 	private int qtaDaProdurre;		//numero di quantita fisse in base agli ordini
 	
@@ -18,33 +18,33 @@ public class Piatto {
 	private double qtaProdMedia;
 	
 	
-	public Piatto(int id, double costo, int tempoPrep, String descrizione, double prezzo, int qta) {
+	public Piatto(int id, double costo, int tempoPrep, String descrizione, double prezzo, int qta, String genere) {
 		this.id = id;
 		this.costo = costo;
 		this.tempoPrep = tempoPrep;
 		this.descrizione = descrizione;
 		this.prezzo = prezzo;
-		this.servito = false;
 		this.quantita = 0;
 		this.qtaPreparazione = qta;
 		this.qtaDaProdurre = 0;
 		this.qtaOrdinMedia = 0;
 		this.qtaProdMedia = 0;
+		this.genere = genere;
 	}
 	
 	
 
 
-	public Piatto(int id, double costo, int tempoPrep, String descrizione, double prezzo) {
+	public Piatto(int id, double costo, int tempoPrep, String descrizione, double prezzo, String genere) {
 		this.id = id;
 		this.costo = costo;
 		this.tempoPrep = tempoPrep;
 		this.descrizione = descrizione;
 		this.prezzo = prezzo;
-		this.servito = false;
 		this.quantita = 0;
 		this.qtaPreparazione = 0;
 		this.qtaDaProdurre = 0;
+		this.genere = genere;
 	}
 
 
@@ -74,6 +74,9 @@ public class Piatto {
 		this.qtaDaProdurre += qtaDaProdurre;
 	}
 
+	public void setQtaDaProdurre2(int q) {
+		this.qtaDaProdurre = q;
+	}
 	
 	public Piatto() {
 	}
@@ -133,13 +136,9 @@ public class Piatto {
 	}
 
 
-
-
 	public void setQtaOrdinMedia(double qtaOrdinMedia) {
 		this.qtaOrdinMedia = qtaOrdinMedia;
 	}
-
-
 
 
 	public double getQtaProdMedia() {
@@ -147,13 +146,17 @@ public class Piatto {
 	}
 
 
-
-
 	public void setQtaProdMedia(double qtaProdMedia) {
 		this.qtaProdMedia = qtaProdMedia;
 	}
 
+	public String getGenere() {
+		return genere;
+	}
 
+	public void setGenere(String genere) {
+		this.genere = genere;
+	}
 
 
 	@Override
@@ -180,25 +183,6 @@ public class Piatto {
 	}
 
 
-	@Override
-	public String toString() {
-		return "Piatto [id=" + id + ", qtaPreparazione=" + qtaPreparazione + ", qtaDaProdurre=" + qtaDaProdurre
-				+ ", quantita=" + quantita + "]";
-	}
-
-
-
-
-	public boolean isServito() {
-		return servito;
-	}
-
-
-	public void setServito() {
-		this.servito = false;
-	}
-
-	
 	public int getQuantita() {
 		return quantita;
 	}
@@ -221,5 +205,25 @@ public class Piatto {
 			this.qtaDaProdurre = (int)d;
 		}
 	}
+
+
+
+	@Override
+	public String toString() {
+		if(!this.haQtaFissa())
+			return this.descrizione+": prezzo "+this.prezzo+"; quantità totale "+this.quantita+";\n quantità media: "+
+					this.qtaOrdinMedia+"\n";
+		else
+			return this.descrizione+": prezzo "+this.prezzo+"; quantità totale "+this.quantita+";\n quantità media: "+
+			this.qtaOrdinMedia+"; quantità da produrre media: "+this.qtaProdMedia+"\n";
+	}
+
+
+	public void setQuantita2(int quantita) {
+		this.quantita = quantita;
+		
+	}
+	
+	
 	
 }

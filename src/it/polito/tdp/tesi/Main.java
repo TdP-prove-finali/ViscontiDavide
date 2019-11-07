@@ -1,6 +1,5 @@
 package it.polito.tdp.tesi;
 
-import it.polito.tdp.tesi.model.Simulazione;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.stage.Stage;
@@ -15,9 +14,6 @@ public class Main extends Application {
 			FXMLLoader loader = new FXMLLoader(getClass().getResource("provaFinale.fxml")) ;
 			BorderPane root = (BorderPane)loader.load();
 			Controller controller = loader.getController() ;
-			
-			Simulazione s = new Simulazione();
-			controller.setSim(s);
 			
 			controller.init();
 			

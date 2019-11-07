@@ -9,13 +9,14 @@ public class Cliente {
 	private List<Piatto> listaPiatti;
 	private List<Bevanda> listaBevande;
 	private int tempoRiordino;
-	private boolean primoOrdine; //per fare in modo che ordini cibo e bevanda
+	private boolean primoOrdine;
 	
 	private double tempoAttesaCassa;
 	private double tempoAttesaServizio;
 	private int numOrdini;
 	
-	private boolean insoddisfatto;
+	private boolean insoddisfattoCoda;
+	private boolean insoddisfattoServizio;
 		
 	
 	public int getNumOrdini() {
@@ -42,18 +43,26 @@ public class Cliente {
 		this.listaBevande = new LinkedList<Bevanda>();
 		this.listaPiatti = new LinkedList<Piatto>();
 		this.primoOrdine = true;
-		this.insoddisfatto = false;
+		this.insoddisfattoCoda = false;
+		this.insoddisfattoServizio = false;
 	}
 	
 	
-	
-	
-	public boolean isInsoddisfatto() {
-		return insoddisfatto;
+
+	public boolean isInsoddisfattoCoda() {
+		return insoddisfattoCoda;
 	}
 
-	public void setInsoddisfatto() {
-		this.insoddisfatto = false;
+	public void setInsoddisfattoCoda() {
+		this.insoddisfattoCoda = true;
+	}
+
+	public boolean isInsoddisfattoServizio() {
+		return insoddisfattoServizio;
+	}
+
+	public void setInsoddisfattoServizio() {
+		this.insoddisfattoServizio = true;
 	}
 
 	public int getId() {
@@ -145,13 +154,15 @@ public class Cliente {
 		this.tempoAttesaServizio += tempoAttesaServizio;
 	}
 
-	public int sommaTempoPiatti() {
-		int somma = 0;
+	
+	public int contaPrincipali() {
+		int a = 0;
 		for(Piatto p : listaPiatti) {
-			if(!p.isServito())
-			somma += p.getTempoPrep();
+			if(p.getGenere().equals("principale")) {
+				a++;
+			}
 		}
-		return somma;
+		return a;
 	}
 	@Override
 	public String toString() {

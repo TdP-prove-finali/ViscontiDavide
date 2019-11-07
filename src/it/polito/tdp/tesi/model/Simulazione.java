@@ -4,13 +4,13 @@ import java.util.*;
 
 public class Simulazione {
 
-	private Model m;
-
 	private int numeroSimulazioni;
 	private double costoMedio;
 	private double guadagnoMedio;
 	private double incassoMedio;
-	private double clientiInsoddisfatti;
+	private double clientiInsoddisfattiCoda;
+	private double clientiInsoddisfattiServizio;
+	private double clientiInsEntrambi;
 	private double numMedioOrdini;
 	
 	private int tempoMaxAttesaCassa; 
@@ -29,11 +29,17 @@ public class Simulazione {
 	
 	public Simulazione(int numero) {
 		this.numeroSimulazioni = numero;
-		this.clientiInsoddisfatti = 0;
+		this.clientiInsoddisfattiCoda = 0;
+		this.clientiInsoddisfattiServizio = 0;
+		this.clientiInsEntrambi = 0;
 		this.costoMedio = 0;
 		this.incassoMedio = 0;
 		this.guadagnoMedio = 0;
 		this.numMedioOrdini = 0;
+		this.tempoMaxAttesaCassa = 0;
+		this.tempoMaxAttesaServizio = 0;
+		this.attesaMediaCassa = 0;
+		this.attesaMediaServizio = 0;
 		this.bevandeOrdinate = new ArrayList<Bevanda>();
 		this.piattiOrdinati = new ArrayList<Piatto>();
 		this.mappaBevande = new HashMap<Integer, Bevanda>();
@@ -71,15 +77,23 @@ public class Simulazione {
 	public void setIncassoMedio(double incassoMedio) {
 		this.incassoMedio = incassoMedio;
 	}
-
-	public double getClientiInsoddisfatti() {
-		return clientiInsoddisfatti;
-	}
-
-	public void setClientiInsoddisfatti(double clientiInsoddisfatti) {
-		this.clientiInsoddisfatti = clientiInsoddisfatti;
-	}
 	
+	public double getClientiInsoddisfattiCoda() {
+		return clientiInsoddisfattiCoda;
+	}
+
+	public void setClientiInsoddisfattiCoda(double clientiInsoddisfattiCoda) {
+		this.clientiInsoddisfattiCoda = clientiInsoddisfattiCoda;
+	}
+
+	public double getClientiInsoddisfattiServizio() {
+		return clientiInsoddisfattiServizio;
+	}
+
+	public void setClientiInsoddisfattiServizio(double clientiInsoddisfattiServizio) {
+		this.clientiInsoddisfattiServizio = clientiInsoddisfattiServizio;
+	}
+
 	public List<Piatto> getPiattiOrdinati() {
 		return piattiOrdinati;
 	}
@@ -118,44 +132,45 @@ public class Simulazione {
 						int dipBancone, double pagaOraria) {
 		
 		for(int i = 0; i< numeroSimulazioni; i ++) {
-			
-			piattiOrdinati.clear();
-			bevandeOrdinate.clear();
-			
-			m = new Model(man, p, b);
+		
+			Model m = new Model(man);
 			m.creaClienti(tempoRiordino);
 			m.creaDipendenti(dipCassa, dipBancone, pagaOraria);
 			
-			m.init();
+			m.init(p,b);
 			m.run();
 
 			for(Cliente c : m.getIdMapClienti().values()) {
-				if(c.isInsoddisfatto())
-					clientiInsoddisfatti++;
+				if(c.isInsoddisfattoCoda() && !c.isInsoddisfattoServizio())
+					clientiInsoddisfattiCoda++;
+				if(c.isInsoddisfattoServizio() && !c.isInsoddisfattoCoda())
+					clientiInsoddisfattiServizio++;
+				if(c.isInsoddisfattoCoda() && c.isInsoddisfattoServizio())
+					clientiInsEntrambi++;
 			}
 			
 			guadagnoMedio += m.getGuadagno();
 			costoMedio += m.getCostoTotale();
 			incassoMedio += m.getIncasso();
 			numMedioOrdini += m.getNumOrdiniTotale();
+			
 			piattiOrdinati.addAll(m.getPiattiOrdinati());
 			bevandeOrdinate.addAll(m.getBevandeOrdinate());
-			
 			
 			attesaMediaCassa += m.calcolaAttesaCassa(m.getIdMapClienti());
 			attesaMediaServizio += m.calcolaAttesaServizio(m.getIdMapClienti());
 			
 			for(Piatto pi : piattiOrdinati) {
 				if(mappaPiatti.containsKey(pi.getId())) {
-					mappaPiatti.get(pi.getId()).setQuantita(pi.getQuantita());
-					mappaPiatti.get(pi.getId()).setQtaDaProdurre(pi.getQtaDaProdurre());
+					mappaPiatti.get(pi.getId()).setQuantita2(pi.getQuantita());    
+					mappaPiatti.get(pi.getId()).setQtaDaProdurre2(pi.getQtaDaProdurre());
 				}else {
 					mappaPiatti.put(pi.getId(), pi);
 				}
 			}
 			for(Bevanda be : bevandeOrdinate) {
 				if(mappaBevande.containsKey(be.getId())) {
-					mappaBevande.get(be.getId()).setQuantita(be.getQuantita());
+					mappaBevande.get(be.getId()).setQuantita2(be.getQuantita());
 				}else {
 					mappaBevande.put(be.getId(), be);
 				}
@@ -165,11 +180,14 @@ public class Simulazione {
 			if(m.getTempoMaxAttesaServizio() > tempoMaxAttesaServizio)
 				tempoMaxAttesaServizio = m.getTempoMaxAttesaServizio();
 		}
+		
 		guadagnoMedio = guadagnoMedio/numeroSimulazioni;
 		costoMedio = costoMedio/numeroSimulazioni;
 		incassoMedio = incassoMedio/numeroSimulazioni;
 		numMedioOrdini = numMedioOrdini/numeroSimulazioni;
-		clientiInsoddisfatti = clientiInsoddisfatti/numeroSimulazioni;
+		clientiInsoddisfattiCoda = clientiInsoddisfattiCoda/numeroSimulazioni;
+		clientiInsoddisfattiServizio = clientiInsoddisfattiServizio/numeroSimulazioni;
+		clientiInsEntrambi = clientiInsEntrambi/numeroSimulazioni;
 		attesaMediaCassa = attesaMediaCassa/numeroSimulazioni;
 		attesaMediaServizio = attesaMediaServizio/numeroSimulazioni;
 		
@@ -178,23 +196,81 @@ public class Simulazione {
 		
 		for(Piatto pia : mappaPiatti.values()) {
 			double qta = pia.getQuantita()/numeroSimulazioni;
-			double qtaProd = pia.getQtaDaProdurre()/numeroSimulazioni;
-			Piatto p1 = new Piatto();
-			p1 = pia;
-			p1.setQtaOrdinMedia(qta);
-			p1.setQtaProdMedia(qtaProd);
-			lp.add(p1);
+			double d = 0;
+			if(pia.getQtaPreparazione() != 0) {
+				d = qta/pia.getQtaPreparazione();
+				double a = Math.floor(d);
+				if(d - a > 0) {
+					d++;
+					d = Math.floor(d);
+				}
+			}
+			pia.setQtaOrdinMedia(qta);
+			pia.setQtaProdMedia(d);
+			lp.add(pia);
 		}
 		
 		for(Bevanda bev : mappaBevande.values()) {
 			double qta = bev.getQuantita()/numeroSimulazioni;
-			Bevanda b1 = new Bevanda();
-			b1 = bev;
-			b1.setQtaOrdinMedia(qta);
-			lb.add(b1);
+			bev.setQtaOrdinMedia(qta);
+			lb.add(bev);
 		}
-		piattiOrdinati = lp;
-		bevandeOrdinate = lb;
+		
+		piattiOrdinati.clear();
+		bevandeOrdinate.clear();
+		piattiOrdinati.addAll(lp);
+		bevandeOrdinate.addAll(lb);
+		
+		mappaPiatti.clear();
+		mappaBevande.clear();
+	}
+
+	public double getNumMedioOrdini() {
+		return numMedioOrdini;
+	}
+
+	public void setNumMedioOrdini(double numMedioOrdini) {
+		this.numMedioOrdini = numMedioOrdini;
+	}
+
+	public int getTempoMaxAttesaCassa() {
+		return tempoMaxAttesaCassa;
+	}
+
+	public void setTempoMaxAttesaCassa(int tempoMaxAttesaCassa) {
+		this.tempoMaxAttesaCassa = tempoMaxAttesaCassa;
+	}
+
+	public double getTempoMaxAttesaServizio() {
+		return tempoMaxAttesaServizio;
+	}
+
+	public void setTempoMaxAttesaServizio(double tempoMaxAttesaServizio) {
+		this.tempoMaxAttesaServizio = tempoMaxAttesaServizio;
+	}
+
+	public double getAttesaMediaCassa() {
+		return attesaMediaCassa;
+	}
+
+	public void setAttesaMediaCassa(double attesaMediaCassa) {
+		this.attesaMediaCassa = attesaMediaCassa;
+	}
+
+	public double getAttesaMediaServizio() {
+		return attesaMediaServizio;
+	}
+
+	public void setAttesaMediaServizio(double attesaMediaServizio) {
+		this.attesaMediaServizio = attesaMediaServizio;
+	}
+
+	public double getClientiInsEntrambi() {
+		return clientiInsEntrambi;
+	}
+
+	public void setClientiInsEntrambi(double clientiInsEntrambi) {
+		this.clientiInsEntrambi = clientiInsEntrambi;
 	}
 	
 	
