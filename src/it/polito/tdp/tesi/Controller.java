@@ -1,7 +1,6 @@
 package it.polito.tdp.tesi;
 
 import java.util.*;
-import it.polito.tdp.tesi.db.ProvaFinaleDAO;
 import it.polito.tdp.tesi.model.Bevanda;
 import it.polito.tdp.tesi.model.Manifestazione;
 import it.polito.tdp.tesi.model.Piatto;
@@ -18,8 +17,8 @@ import javafx.scene.control.TextField;
 
 public class Controller {
 	
-	private ProvaFinaleDAO dao;
-
+	private Simulazione sim;
+	
     @FXML
     private ComboBox<Manifestazione> boxManifestazione;
 
@@ -61,18 +60,23 @@ public class Controller {
     	numSimulazioni.clear();
     	this.paga.clear();
     	txtResult.clear();
+    	boxManifestazione.getItems().clear();
+    	menuPiatti.getItems().clear();
+    	menuBevande.getItems().clear();
+    	init();
     }
 
     @FXML
     void doSimula(ActionEvent event) {
     	
     	txtResult.clear();
+    	sim = new Simulazione();
     	
     	List<Piatto> piatti = new LinkedList<Piatto>();
     	for(MenuItem m : menuPiatti.getItems()) {
     		if(m instanceof CheckMenuItem) {
     			if(((CheckMenuItem) m).isSelected()) {
-    				for(Piatto p : dao.listaPiattiDAO()) {
+    				for(Piatto p : sim.getDao().listaPiattiDAO()) {
     					if(m.getText().equals(p.getDescrizione())) {
     						piatti.add(p);
     					}
@@ -84,7 +88,7 @@ public class Controller {
     	for(MenuItem m : menuBevande.getItems()) {
     		if(m instanceof CheckMenuItem) {
     			if(((CheckMenuItem) m).isSelected()) {
-    				for(Bevanda b : dao.listaBevandeDAO()) {
+    				for(Bevanda b : sim.getDao().listaBevandeDAO()) {
     					if(m.getText().equals(b.getDescrizione())) {
     						bevande.add(b);
     					}
@@ -178,16 +182,16 @@ public class Controller {
 
 
 	public void init() {
-		dao = new ProvaFinaleDAO();
-		for(Manifestazione m : dao.listaManifestazioniDAO()) {
+		sim = new Simulazione();
+		for(Manifestazione m : sim.getDao().listaManifestazioniDAO()) {
 			boxManifestazione.getItems().add(m);
 		}
-		for(Piatto p : dao.listaPiattiDAO()) {
+		for(Piatto p : sim.getDao().listaPiattiDAO()) {
 			String s = p.getDescrizione();
 			CheckMenuItem cmi = new CheckMenuItem(s);
 			menuPiatti.getItems().add(cmi);
 		}
-		for(Bevanda b : dao.listaBevandeDAO()) {
+		for(Bevanda b : sim.getDao().listaBevandeDAO()) {
 			String s = b.getDescrizione();
 			CheckMenuItem cmi = new CheckMenuItem(s);
 			menuBevande.getItems().add(cmi);

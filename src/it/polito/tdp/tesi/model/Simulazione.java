@@ -2,6 +2,8 @@ package it.polito.tdp.tesi.model;
 
 import java.util.*;
 
+import it.polito.tdp.tesi.db.ProvaFinaleDAO;
+
 public class Simulazione {
 
 	private int numeroSimulazioni;
@@ -12,6 +14,7 @@ public class Simulazione {
 	private double clientiInsoddisfattiServizio;
 	private double clientiInsEntrambi;
 	private double numMedioOrdini;
+
 	
 	private int tempoMaxAttesaCassa; 
 	private double tempoMaxAttesaServizio;
@@ -24,8 +27,12 @@ public class Simulazione {
 	private Map<Integer,Piatto> mappaPiatti;
 	private Map<Integer,Bevanda> mappaBevande;
 	
+	private ProvaFinaleDAO dao;
 	
-	public Simulazione() {}
+	
+	public Simulazione() {
+		this.dao = new ProvaFinaleDAO();
+	}
 	
 	public Simulazione(int numero) {
 		this.numeroSimulazioni = numero;
@@ -44,6 +51,15 @@ public class Simulazione {
 		this.piattiOrdinati = new ArrayList<Piatto>();
 		this.mappaBevande = new HashMap<Integer, Bevanda>();
 		this.mappaPiatti = new HashMap<Integer, Piatto>();
+		this.dao = new ProvaFinaleDAO();
+	}
+
+	public ProvaFinaleDAO getDao() {
+		return dao;
+	}
+
+	public void setDao(ProvaFinaleDAO dao) {
+		this.dao = dao;
 	}
 
 	public int getNumeroSimulazioni() {

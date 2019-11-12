@@ -77,7 +77,7 @@ public class Model {
 		listaDipendentiCassa.clear();
 		
 		for(int i = 0; i < cassa; i++) {
-			Dipendente d = new Dipendente(i, paga);				//un dipendente fisso bevande, messo tra bancone
+			Dipendente d = new Dipendente(i, paga);		//un dipendente fisso bevande, tra quelli al bancone
 			listaDipendentiCassa.add(d);
 		}
 		for(int i = cassa; i < (bancone+cassa); i++) {
@@ -754,7 +754,7 @@ public class Model {
 		Map<Bevanda,Bevanda> l = new HashMap<Bevanda, Bevanda>();
 		for(Bevanda b : lb) {
 			if (!l.containsKey(b)) {
-				b.setQuantita(0); //controllo
+				b.setQuantita(0);
 				b.incrementaQuantita();
 				l.put(b, b);
 			}
